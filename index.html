@@ -14,29 +14,6 @@
     min-height: 100vh;
   }
 
-  /* Wavy frame behind everything */
-  body::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-      repeating-linear-gradient(
-        45deg,
-        #ffe066 0px,
-        #ffe066 10px,
-        #ff6b6b 10px,
-        #ff6b6b 20px,
-        #6bcf6b 20px,
-        #6bcf6b 30px
-      );
-    opacity: 0.2;
-    z-index: 1;
-    pointer-events: none;
-  }
-
   h1, p {
     color: white;
     z-index: 10;
@@ -58,13 +35,26 @@
   #bouquet {
     position: fixed;
     left: 50%;
-    top: 55%; /* bouquet lower on the screen */
-    transform: translate(-50%, -50%) scale(0.5); /* starting smaller and centered */
+    top: 55%;
+    transform: translate(-50%, -50%) scale(0.5);
     opacity: 0;
     transition: transform 1.5s ease, opacity 1.5s ease;
     z-index: 5;
     width: 400px;
   }
+
+  /* Container for the wavy frames - full viewport */
+  #wavy-frame {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2; /* behind content (z=5 bouquet, z=10 text) */
+  }
+
+  /* Each wave path is absolutely positioned SVG paths in pink, green, yellow */
+
 </style>
 </head>
 <body>
@@ -73,6 +63,78 @@
 <p>Eres lo más importante que tengo.</p>
 
 <img id="bouquet" src="bouquet.png">
+
+<!-- Wavy line frame SVG -->
+<svg id="wavy-frame" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" >
+  <!-- Yellow wave -->
+  <path stroke="#ffe066" stroke-width="1.5" fill="none" d="
+    M5 5 
+    Q10 0 15 5 
+    Q20 10 25 5 
+    Q30 0 35 5 
+    Q40 10 45 5 
+    Q50 0 55 5 
+    Q60 10 65 5 
+    Q70 0 75 5 
+    Q80 10 85 5 
+    Q90 0 95 5 
+    L95 95 
+    Q90 100 85 95 
+    Q80 90 75 95 
+    Q70 100 65 95 
+    Q60 90 55 95 
+    Q50 100 45 95 
+    Q40 90 35 95 
+    Q30 100 25 95 
+    Q20 90 15 95 
+    Q10 100 5 95 
+    Z
+  "/>
+
+  <!-- Pink wave (offset slightly inside) -->
+  <path stroke="#ff6b6b" stroke-width="1.5" fill="none" d="
+    M10 10 
+    Q15 5 20 10 
+    Q25 15 30 10 
+    Q35 5 40 10 
+    Q45 15 50 10 
+    Q55 5 60 10 
+    Q65 15 70 10 
+    Q75 5 80 10 
+    Q85 15 90 10 
+    L90 90 
+    Q85 95 80 90 
+    Q75 85 70 90 
+    Q65 95 60 90 
+    Q55 85 50 90 
+    Q45 95 40 90 
+    Q35 85 30 90 
+    Q25 95 20 90 
+    Q15 85 10 90 
+    Z
+  "/>
+
+  <!-- Green wave (further inside) -->
+  <path stroke="#6bcf6b" stroke-width="1.5" fill="none" d="
+    M15 15 
+    Q20 10 25 15 
+    Q30 20 35 15 
+    Q40 10 45 15 
+    Q50 20 55 15 
+    Q60 10 65 15 
+    Q70 20 75 15 
+    Q80 10 85 15 
+    L85 85 
+    Q80 90 75 85 
+    Q70 80 65 85 
+    Q60 90 55 85 
+    Q50 80 45 85 
+    Q40 90 35 85 
+    Q30 80 25 85 
+    Q20 90 15 85 
+    Z
+  "/>
+</svg>
 
 <script>
 const numHearts = 50;
