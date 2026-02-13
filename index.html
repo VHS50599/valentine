@@ -33,13 +33,13 @@
   #bouquet {
     position: fixed;
     left: 50%;
-    top: 70%;              /* move bouquet down */
-    transform: translate(-50%, -50%) scale(0.5); /* keep translate as is */
+    top: 75%; /* bouquet lower on the screen */
+    transform: translate(-50%, -50%) scale(0.5); /* starting smaller and centered */
     opacity: 0;
-    transition: 1.5s ease;
+    transition: transform 1.5s ease, opacity 1.5s ease;
     z-index: 5;
     width: 220px;
-}
+  }
 </style>
 </head>
 <body>
@@ -61,80 +61,69 @@ const cellW = window.innerWidth / cols;
 const cellH = window.innerHeight / rows;
 
 // create hearts
-for(let i=0;i<numHearts;i++){
-  const heart=document.createElement("div");
-  heart.className="heart";
-  heart.innerHTML="\u2764\uFE0E";
+for(let i=0; i<numHearts; i++){
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.innerHTML = "\u2764\uFE0E";
   document.body.appendChild(heart);
 
-  const col=i%cols;
-  const row=Math.floor(i/cols);
+  const col = i % cols;
+  const row = Math.floor(i / cols);
 
-  heart.style.left=(col*cellW+cellW/2)+"px";
-  heart.style.top=(row*cellH+cellH/2)+"px";
+  heart.style.left = (col * cellW + cellW / 2) + "px";
+  heart.style.top = (row * cellH + cellH / 2) + "px";
 
-  heart.blinkSpeed=0.005+Math.random()*0.01;
-  heart.phase=Math.random();
-  heart.style.fontSize=(15+Math.random()*25)+"px";
+  heart.blinkSpeed = 0.005 + Math.random() * 0.01;
+  heart.phase = Math.random();
+  heart.style.fontSize = (15 + Math.random() * 25) + "px";
 
   hearts.push(heart);
 }
 
 // animation
-function animate(){
-  hearts.forEach(h=>{
+function animate() {
+  hearts.forEach(h => {
+    if (forming) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
 
-    if(forming){
-      const cx=window.innerWidth/2;
-      const cy=window.innerHeight/2;
+      const x = parseFloat(h.style.left);
+      const y = parseFloat(h.style.top);
 
-      const x=parseFloat(h.style.left);
-      const y=parseFloat(h.style.top);
-
-      h.style.left=x+(cx-x)*0.06+"px";
-      h.style.top=y+(cy-y)*0.06+"px";
-      h.style.opacity=1;
+      h.style.left = x + (cx - x) * 0.06 + "px";
+      h.style.top = y + (cy - y) * 0.06 + "px";
+      h.style.opacity = 1;
       return;
     }
 
-    h.phase+=h.blinkSpeed;
+    h.phase += h.blinkSpeed;
 
-    if(h.phase>=1){
-      h.style.left=Math.random()*window.innerWidth+"px";
-      h.style.top=Math.random()*window.innerHeight+"px";
-      h.phase=0;
+    if (h.phase >= 1) {
+      h.style.left = Math.random() * window.innerWidth + "px";
+      h.style.top = Math.random() * window.innerHeight + "px";
+      h.phase = 0;
     }
 
-    h.style.opacity=Math.sin(h.phase*Math.PI);
+    h.style.opacity = Math.sin(h.phase * Math.PI);
   });
 
   requestAnimationFrame(animate);
 }
 animate();
 
-// tap trigger
-document.addEventListener("click",()=>{
-  if(forming) return;
-  forming=true;
+// click trigger
+document.addEventListener("click", () => {
+  if (forming) return;
+  forming = true;
 
-  setTimeout(()=>{
-    document.getElementById("bouquet").style.opacity=1;
-    document.getElementById("bouquet").style.transform="translate(-50%, -50%) scale(1)";
-  },900);
+  setTimeout(() => {
+    const bouquet = document.getElementById("bouquet");
+    bouquet.style.opacity = 1;
+    bouquet.style.transform = "translate(-50%, -50%) scale(1)";
+  }, 900);
 });
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
