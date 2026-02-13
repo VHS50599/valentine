@@ -19,21 +19,26 @@
     position: relative;
   }
 
-  h1 {
-    font-size: clamp(28px, 8vw, 50px);
-  }
-
-  p {
-    font-size: clamp(18px, 5vw, 30px);
-  }
+  h1 { font-size: clamp(28px, 8vw, 50px); }
+  p { font-size: clamp(18px, 5vw, 30px); }
 
   .heart {
     position: absolute;
     color: white;
-    font-size: 20px;
     opacity: 0;
     user-select: none;
     pointer-events: none;
+  }
+
+  #bouquet {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    transition: 1.5s ease;
+    z-index: 5;
+    max-width: 60vw;
   }
 </style>
 </head>
@@ -42,97 +47,81 @@
 <h1>Feliz Día De San Valentín</h1>
 <p>Eres lo más importante que tengo.</p>
 
+<img id="bouquet" src="https://png.pngtree.com/png-clipart/20220125/original/pngtree-original-simple-hand-painted-flower-thanksgiving-lily-bouquet-png-image_7225816.png">
+
 <script>
 const numHearts = 50;
 const hearts = [];
-let bouquetMode = false;
-let bouquetTargets = [];
+let forming = false;
 
-// grid layout start positions
+// starting grid positions
 const cols = Math.ceil(Math.sqrt(numHearts));
 const rows = Math.ceil(numHearts / cols);
 const cellW = window.innerWidth / cols;
 const cellH = window.innerHeight / rows;
 
 // create hearts
-for(let i = 0; i < numHearts; i++) {
-  const heart = document.createElement('div');
-  heart.className = 'heart';
-  heart.innerHTML = '\u2764\uFE0E';
+for(let i=0;i<numHearts;i++){
+  const heart=document.createElement("div");
+  heart.className="heart";
+  heart.innerHTML="\u2764\uFE0E";
   document.body.appendChild(heart);
 
-  const col = i % cols;
-  const row = Math.floor(i / cols);
+  const col=i%cols;
+  const row=Math.floor(i/cols);
 
-  heart.style.left = (col * cellW + cellW/2) + 'px';
-  heart.style.top = (row * cellH + cellH/2) + 'px';
+  heart.style.left=(col*cellW+cellW/2)+"px";
+  heart.style.top=(row*cellH+cellH/2)+"px";
 
-  const size = 15 + Math.random() * 25;
-  heart.style.fontSize = size + 'px';
-  heart.blinkSpeed = 0.005 + Math.random() * 0.01;
-  heart.phase = Math.random();
+  heart.blinkSpeed=0.005+Math.random()*0.01;
+  heart.phase=Math.random();
+  heart.style.fontSize=(15+Math.random()*25)+"px";
 
   hearts.push(heart);
 }
 
-// bouquet shape targets
-const centerX = window.innerWidth / 2;
-const centerY = window.innerHeight / 2;
+// animation
+function animate(){
+  hearts.forEach(h=>{
 
-for(let i = 0; i < numHearts; i++){
-  let x = centerX;
-  let y = centerY;
+    if(forming){
+      const cx=window.innerWidth/2;
+      const cy=window.innerHeight/2;
 
-  if(i < numHearts * 0.7){
-    const angle = Math.random() * Math.PI * 2;
-    const radius = Math.random() * 120;
-    x += Math.cos(angle) * radius;
-    y += Math.sin(angle) * radius - 100;
-  }
-  else{
-    x += (Math.random() - 0.5) * 40;
-    y += 100 + Math.random() * 120;
-  }
+      const x=parseFloat(h.style.left);
+      const y=parseFloat(h.style.top);
 
-  bouquetTargets.push({x,y});
-}
-
-// animation loop
-function animateHearts() {
-  hearts.forEach((heart,i) => {
-
-    if(bouquetMode){
-      const target = bouquetTargets[i];
-      const currentX = parseFloat(heart.style.left);
-      const currentY = parseFloat(heart.style.top);
-
-      heart.style.left = currentX + (target.x - currentX) * 0.05 + "px";
-      heart.style.top = currentY + (target.y - currentY) * 0.05 + "px";
-      heart.style.opacity = 1;
+      h.style.left=x+(cx-x)*0.06+"px";
+      h.style.top=y+(cy-y)*0.06+"px";
+      h.style.opacity=1;
       return;
     }
 
-    heart.phase += heart.blinkSpeed;
+    h.phase+=h.blinkSpeed;
 
-    if(heart.phase >= 1){
-      heart.style.left = Math.random() * window.innerWidth + 'px';
-      heart.style.top = Math.random() * window.innerHeight + 'px';
-      heart.phase = 0;
+    if(h.phase>=1){
+      h.style.left=Math.random()*window.innerWidth+"px";
+      h.style.top=Math.random()*window.innerHeight+"px";
+      h.phase=0;
     }
 
-    heart.style.opacity = Math.sin(heart.phase * Math.PI);
+    h.style.opacity=Math.sin(h.phase*Math.PI);
   });
 
-  requestAnimationFrame(animateHearts);
+  requestAnimationFrame(animate);
 }
+animate();
 
-animateHearts();
+// tap trigger
+document.addEventListener("click",()=>{
+  if(forming) return;
+  forming=true;
 
-// trigger bouquet mode after 4 seconds
-setTimeout(()=>{
-  bouquetMode = true;
-},4000);
-
+  setTimeout(()=>{
+    document.getElementById("bouquet").style.opacity=1;
+    document.getElementById("bouquet").style.transform="translate(-50%, -50%) scale(1)";
+  },900);
+});
 </script>
 
 </body>
