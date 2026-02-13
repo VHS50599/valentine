@@ -20,26 +20,16 @@
   }
 
   h1 {
-    font-size: 50px; /* default for desktop */
-  }
+  font-size: clamp(28px, 8vw, 50px);
+}
 
-  p {
-    font-size: 30px; /* default for desktop */
-    margin-top: 20px;
-  }
+p {
+  font-size: clamp(18px, 5vw, 30px);
+}
+
 
   /* Mobile adjustments */
-  @media (max-width: 600px) {
-    body {
-      margin-top: 50px; /* less top margin on phones */
-    }
-    h1 {
-      font-size: 30px; /* bigger on phone screen */
-    }
-    p {
-      font-size: 20px; /* bigger on phone screen */
-    }
-  }
+
 
   .heart {
     position: absolute;
@@ -96,4 +86,5 @@
 
 </body>
 </html>
+
 
