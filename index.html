@@ -53,11 +53,21 @@
 <img id="bouquet" src="bouquet.png" alt="Bouquet">
 
 <script>
-const numHearts = 200; // doubled
+const numHearts = 200;
 const hearts = [];
 const heartPositions = [];
 const heartSizes = [];
 let forming = false;
+
+// Grab text boundaries
+function getTextRects() {
+  const rects = [];
+  const elements = document.querySelectorAll('h1, p');
+  elements.forEach(el => {
+    rects.push(el.getBoundingClientRect());
+  });
+  return rects;
+}
 
 // Check overlap between two circles
 function isOverlapping(x1, y1, r1, x2, y2, r2) {
@@ -67,20 +77,42 @@ function isOverlapping(x1, y1, r1, x2, y2, r2) {
   return distance < r1 + r2;
 }
 
-// Find random non-overlapping position
+// Check if heart overlaps any text rect
+function overlapsText(x, y, r, textRects) {
+  for (const rect of textRects) {
+    // Find closest point in rect to circle center
+    const closestX = Math.max(rect.left, Math.min(x, rect.right));
+    const closestY = Math.max(rect.top, Math.min(y, rect.bottom));
+    const dx = x - closestX;
+    const dy = y - closestY;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    if (distance < r) return true;
+  }
+  return false;
+}
+
+// Find random position avoiding hearts and text
 function getNonOverlappingPosition(radius) {
   const maxAttempts = 200;
   let attempt = 0;
+  const textRects = getTextRects();
   while (attempt < maxAttempts) {
     const x = Math.random() * (window.innerWidth - 2*radius) + radius;
     const y = Math.random() * (window.innerHeight - 2*radius) + radius;
 
     let overlap = false;
+
+    // Check other hearts
     for (let i=0; i<heartPositions.length; i++) {
       if (isOverlapping(x, y, radius, heartPositions[i].x, heartPositions[i].y, heartSizes[i])) {
         overlap = true;
         break;
       }
+    }
+
+    // Check text
+    if (!overlap && overlapsText(x, y, radius, textRects)) {
+      overlap = true;
     }
 
     if (!overlap) return { x, y };
@@ -89,7 +121,7 @@ function getNonOverlappingPosition(radius) {
   return null;
 }
 
-// Create hearts initially
+// Create hearts
 for(let i=0; i<numHearts; i++){
   const heart = document.createElement("div");
   heart.className = "heart";
@@ -102,16 +134,16 @@ for(let i=0; i<numHearts; i++){
   document.body.appendChild(heart);
   hearts.push(heart);
   heartSizes.push(radius);
-  heartPositions.push({ x: 0, y: 0 }); // placeholder
+  heartPositions.push({ x: 0, y: 0 });
 }
 
-// Function to make a single heart blink and move continuously
+// Animate single heart
 function animateHeart(i) {
   const heart = hearts[i];
   const radius = heartSizes[i];
 
   function blink() {
-    // Pick new position
+    // Pick new position avoiding text and other hearts
     const pos = getNonOverlappingPosition(radius);
     if (pos) {
       heart.style.left = pos.x + "px";
@@ -122,26 +154,21 @@ function animateHeart(i) {
     // Show heart
     heart.style.opacity = 1;
 
-    // How long the heart stays visible
-    const visibleTime = 800 + Math.random()*700; // 0.8–1.5s
+    // Visible time
+    const visibleTime = 800 + Math.random()*700;
 
     setTimeout(() => {
-      // Hide heart
       heart.style.opacity = 0;
-
-      // How long until it reappears
       const invisibleTime = 300 + Math.random()*700; // stagger
       setTimeout(blink, invisibleTime);
     }, visibleTime);
   }
 
-  // Start the blinking loop
   blink();
 }
 
-// Start blinking for all hearts independently
+// Start all hearts
 for(let i=0; i<hearts.length; i++){
-  // Stagger start times slightly for more continuous coverage
   setTimeout(() => animateHeart(i), Math.random()*1000);
 }
 
