@@ -58,7 +58,8 @@ const cellH = window.innerHeight / rows;
 for(let i = 0; i < numHearts; i++) {
   const heart = document.createElement('div');
   heart.className = 'heart';
-  heart.innerHTML = '♥';
+  heart.innerHTML = '\u2764\uFE0E';
+
   document.body.appendChild(heart);
 
   const col = i % cols;
@@ -97,6 +98,7 @@ for(let i = 0; i < numHearts; i++) {
 
 </body>
 </html>
+
 
 
 
