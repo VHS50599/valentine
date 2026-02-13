@@ -50,20 +50,31 @@ p {
   const numHearts = 50;
   const hearts = [];
 
-  for(let i = 0; i < numHearts; i++) {
-    const heart = document.createElement('div');
-    heart.className = 'heart';
-    heart.innerHTML = '❤';
-    document.body.appendChild(heart);
+  const cols = Math.ceil(Math.sqrt(numHearts));
+const rows = Math.ceil(numHearts / cols);
+const cellW = window.innerWidth / cols;
+const cellH = window.innerHeight / rows;
 
-    heart.style.left = Math.random() * window.innerWidth + 'px';
-    heart.style.top = Math.random() * window.innerHeight + 'px';
-    const size = 10 + Math.random() * 30;
-    heart.style.fontSize = size + 'px';
-    heart.blinkSpeed = 0.005 + Math.random() * 0.01;
-    heart.phase = Math.random();
-    hearts.push(heart);
-  }
+for(let i = 0; i < numHearts; i++) {
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.innerHTML = '♥';
+  document.body.appendChild(heart);
+
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+
+  heart.style.left = (col * cellW + cellW/2) + 'px';
+  heart.style.top = (row * cellH + cellH/2) + 'px';
+
+  const size = 15 + Math.random() * 25;
+  heart.style.fontSize = size + 'px';
+  heart.blinkSpeed = 0.005 + Math.random() * 0.01;
+  heart.phase = Math.random();
+
+  hearts.push(heart);
+}
+
 
   function animateHearts() {
     hearts.forEach(heart => {
@@ -86,5 +97,6 @@ p {
 
 </body>
 </html>
+
 
 
