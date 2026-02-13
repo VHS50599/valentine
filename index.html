@@ -30,6 +30,7 @@
     user-select: none;
     pointer-events: none;
     opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
   #bouquet {
@@ -52,7 +53,7 @@
 <img id="bouquet" src="bouquet.png" alt="Bouquet">
 
 <script>
-const numHearts = 100;
+const numHearts = 200; // doubled
 const hearts = [];
 const heartPositions = [];
 const heartSizes = [];
@@ -88,12 +89,12 @@ function getNonOverlappingPosition(radius) {
   return null;
 }
 
-// Create hearts initially (positions don’t matter since they’ll start invisible)
+// Create hearts initially
 for(let i=0; i<numHearts; i++){
   const heart = document.createElement("div");
   heart.className = "heart";
   heart.innerHTML = "\u2764\uFE0E";
-  
+
   const fontSize = 15 + Math.random() * 25;
   heart.style.fontSize = fontSize + "px";
   const radius = fontSize * 0.6;
@@ -104,34 +105,45 @@ for(let i=0; i<numHearts; i++){
   heartPositions.push({ x: 0, y: 0 }); // placeholder
 }
 
-// Function to make hearts appear at random non-overlapping positions
-function popHearts() {
-  hearts.forEach((heart, i) => {
-    heart.style.opacity = 0; // start invisible
+// Function to make a single heart blink and move continuously
+function animateHeart(i) {
+  const heart = hearts[i];
+  const radius = heartSizes[i];
+
+  function blink() {
+    // Pick new position
+    const pos = getNonOverlappingPosition(radius);
+    if (pos) {
+      heart.style.left = pos.x + "px";
+      heart.style.top = pos.y + "px";
+      heartPositions[i] = { x: pos.x, y: pos.y };
+    }
+
+    // Show heart
+    heart.style.opacity = 1;
+
+    // How long the heart stays visible
+    const visibleTime = 800 + Math.random()*700; // 0.8–1.5s
 
     setTimeout(() => {
-      const pos = getNonOverlappingPosition(heartSizes[i]);
-      if (pos) {
-        heart.style.left = pos.x + "px";
-        heart.style.top = pos.y + "px";
-        heartPositions[i] = { x: pos.x, y: pos.y };
-        heart.style.opacity = 1;
+      // Hide heart
+      heart.style.opacity = 0;
 
-        // After a short visible time, disappear again
-        setTimeout(() => {
-          heart.style.opacity = 0;
-        }, 800 + Math.random()*700); // visible 0.8–1.5s
-      }
-    }, Math.random() * 3000); // stagger appearance times
-  });
+      // How long until it reappears
+      const invisibleTime = 300 + Math.random()*700; // stagger
+      setTimeout(blink, invisibleTime);
+    }, visibleTime);
+  }
+
+  // Start the blinking loop
+  blink();
 }
 
-// Continuously repeat the popHearts function
-function animateHearts() {
-  popHearts();
-  setTimeout(animateHearts, 2000); // run again every 2 seconds
+// Start blinking for all hearts independently
+for(let i=0; i<hearts.length; i++){
+  // Stagger start times slightly for more continuous coverage
+  setTimeout(() => animateHeart(i), Math.random()*1000);
 }
-animateHearts();
 
 // Click to show bouquet
 document.addEventListener("click", () => {
@@ -148,5 +160,3 @@ document.addEventListener("click", () => {
 
 </body>
 </html>
-
-
