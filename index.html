@@ -2,33 +2,43 @@
 <html>
 <head>
 <title>Para Mi Monita Hermosa ❤️</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  /* Make the page responsive on phones */
-  meta[name="viewport"] {
-    width: device-width;
-    initial-scale: 1.0;
-  }
-
   body {
     background-color: #b180f0;
     text-align: center;
     margin-top: 100px;
     font-family: Arial;
     overflow: hidden;
-    position: relative; /* for absolute hearts */
+    position: relative;
   }
 
   h1, p {
     color: white;
     z-index: 10;
     position: relative;
-    /* Make text bigger on small screens */
-    font-size: 6vw; /* 6% of the screen width */
+  }
+
+  h1 {
+    font-size: 50px; /* default for desktop */
   }
 
   p {
+    font-size: 30px; /* default for desktop */
     margin-top: 20px;
-    font-size: 4vw;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 600px) {
+    body {
+      margin-top: 50px; /* less top margin on phones */
+    }
+    h1 {
+      font-size: 30px; /* bigger on phone screen */
+    }
+    p {
+      font-size: 20px; /* bigger on phone screen */
+    }
   }
 
   .heart {
@@ -40,10 +50,6 @@
     pointer-events: none;
   }
 </style>
-
-<!-- Responsive viewport meta -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 </head>
 <body>
 
@@ -51,38 +57,34 @@
 <p>Eres lo más importante que tengo.</p>
 
 <script>
-  const numHearts = 50; // more hearts
+  const numHearts = 50;
   const hearts = [];
 
-  // create hearts
   for(let i = 0; i < numHearts; i++) {
     const heart = document.createElement('div');
     heart.className = 'heart';
     heart.innerHTML = '❤';
     document.body.appendChild(heart);
 
-    // initialize random position, size, speed, and phase
     heart.style.left = Math.random() * window.innerWidth + 'px';
     heart.style.top = Math.random() * window.innerHeight + 'px';
-    const size = 10 + Math.random() * 30; // 10px to 40px
+    const size = 10 + Math.random() * 30;
     heart.style.fontSize = size + 'px';
-    heart.blinkSpeed = 0.005 + Math.random() * 0.01; // slower, random speed
-    heart.phase = Math.random(); // random start phase
+    heart.blinkSpeed = 0.005 + Math.random() * 0.01;
+    heart.phase = Math.random();
     hearts.push(heart);
   }
 
   function animateHearts() {
     hearts.forEach(heart => {
-      heart.phase += heart.blinkSpeed; // each heart moves at its own speed
+      heart.phase += heart.blinkSpeed;
       if(heart.phase >= 1) {
-        // reset to new position and size
         heart.style.left = Math.random() * window.innerWidth + 'px';
         heart.style.top = Math.random() * window.innerHeight + 'px';
         const size = 10 + Math.random() * 30;
         heart.style.fontSize = size + 'px';
         heart.phase = 0;
       }
-      // opacity as sine wave for smooth fade
       heart.style.opacity = Math.sin(heart.phase * Math.PI);
     });
 
