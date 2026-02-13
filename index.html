@@ -29,8 +29,7 @@
     color: white;
     user-select: none;
     pointer-events: none;
-    transition: opacity 0.3s ease, left 0.5s ease, top 0.5s ease;
-    will-change: left, top, opacity;
+    opacity: 0;
   }
 
   #bouquet {
@@ -53,134 +52,88 @@
 <img id="bouquet" src="bouquet.png" alt="Bouquet">
 
 <script>
-const numHearts = 100;  // number of hearts
+const numHearts = 100;
 const hearts = [];
-const heartPositions = []; // stores {x, y, radius} for each heart to check overlap
+const heartPositions = [];
+const heartSizes = [];
 let forming = false;
 
 // Check overlap between two circles
 function isOverlapping(x1, y1, r1, x2, y2, r2) {
   const dx = x1 - x2;
   const dy = y1 - y2;
-  const distance = Math.sqrt(dx * dx + dy * dy);
+  const distance = Math.sqrt(dx*dx + dy*dy);
   return distance < r1 + r2;
 }
 
-// Find a random non-overlapping position for a heart
+// Find random non-overlapping position
 function getNonOverlappingPosition(radius) {
   const maxAttempts = 200;
   let attempt = 0;
   while (attempt < maxAttempts) {
-    const x = Math.random() * (window.innerWidth - 2 * radius) + radius;
-    const y = Math.random() * (window.innerHeight - 2 * radius) + radius;
+    const x = Math.random() * (window.innerWidth - 2*radius) + radius;
+    const y = Math.random() * (window.innerHeight - 2*radius) + radius;
 
     let overlap = false;
-    for (const pos of heartPositions) {
-      if (isOverlapping(x, y, radius, pos.x, pos.y, pos.radius)) {
+    for (let i=0; i<heartPositions.length; i++) {
+      if (isOverlapping(x, y, radius, heartPositions[i].x, heartPositions[i].y, heartSizes[i])) {
         overlap = true;
         break;
       }
     }
+
     if (!overlap) return { x, y };
     attempt++;
   }
   return null;
 }
 
-// Update stored position for heart index
-function updateHeartPosition(index, x, y, radius) {
-  heartPositions[index] = { x, y, radius };
-}
-
-// Create hearts initially with non-overlapping positions
-for(let i = 0; i < numHearts; i++) {
+// Create hearts initially (positions don’t matter since they’ll start invisible)
+for(let i=0; i<numHearts; i++){
   const heart = document.createElement("div");
   heart.className = "heart";
   heart.innerHTML = "\u2764\uFE0E";
-
-  // Random size and radius
+  
   const fontSize = 15 + Math.random() * 25;
   heart.style.fontSize = fontSize + "px";
   const radius = fontSize * 0.6;
 
-  const pos = getNonOverlappingPosition(radius);
-  if (!pos) {
-    // No room found for this heart, skip
-    continue;
-  }
-
-  heart.style.left = pos.x + "px";
-  heart.style.top = pos.y + "px";
-
-  heartPositions.push({ x: pos.x, y: pos.y, radius });
-
-  heart.style.opacity = 0;
-  heart.blinkSpeed = 0.005 + Math.random() * 0.01;
-  heart.phase = Math.random();
-
   document.body.appendChild(heart);
   hearts.push(heart);
+  heartSizes.push(radius);
+  heartPositions.push({ x: 0, y: 0 }); // placeholder
 }
 
-function animate() {
-  hearts.forEach((h, i) => {
-    if (forming) {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
+// Function to make hearts appear at random non-overlapping positions
+function popHearts() {
+  hearts.forEach((heart, i) => {
+    heart.style.opacity = 0; // start invisible
 
-      const x = parseFloat(h.style.left);
-      const y = parseFloat(h.style.top);
+    setTimeout(() => {
+      const pos = getNonOverlappingPosition(heartSizes[i]);
+      if (pos) {
+        heart.style.left = pos.x + "px";
+        heart.style.top = pos.y + "px";
+        heartPositions[i] = { x: pos.x, y: pos.y };
+        heart.style.opacity = 1;
 
-      h.style.left = x + (cx - x) * 0.06 + "px";
-      h.style.top = y + (cy - y) * 0.06 + "px";
-      h.style.opacity = 1;
-      return;
-    }
-
-    h.phase += h.blinkSpeed;
-
-    if (h.phase >= 1) {
-      // Move heart to new non-overlapping position smoothly
-      const radius = heartPositions[i].radius;
-      let newPos = null;
-      let attempts = 0;
-      const maxAttempts = 200;
-
-      while (attempts < maxAttempts) {
-        const x = Math.random() * (window.innerWidth - 2 * radius) + radius;
-        const y = Math.random() * (window.innerHeight - 2 * radius) + radius;
-
-        let overlap = false;
-        for (let j = 0; j < heartPositions.length; j++) {
-          if (j === i) continue;
-          if (isOverlapping(x, y, radius, heartPositions[j].x, heartPositions[j].y, heartPositions[j].radius)) {
-            overlap = true;
-            break;
-          }
-        }
-
-        if (!overlap) {
-          newPos = { x, y };
-          break;
-        }
-        attempts++;
+        // After a short visible time, disappear again
+        setTimeout(() => {
+          heart.style.opacity = 0;
+        }, 800 + Math.random()*700); // visible 0.8–1.5s
       }
-
-      if (newPos) {
-        h.style.left = newPos.x + "px";
-        h.style.top = newPos.y + "px";
-        updateHeartPosition(i, newPos.x, newPos.y, radius);
-      }
-      h.phase = 0;
-    }
-
-    h.style.opacity = Math.sin(h.phase * Math.PI);
+    }, Math.random() * 3000); // stagger appearance times
   });
-
-  requestAnimationFrame(animate);
 }
-animate();
 
+// Continuously repeat the popHearts function
+function animateHearts() {
+  popHearts();
+  setTimeout(animateHearts, 2000); // run again every 2 seconds
+}
+animateHearts();
+
+// Click to show bouquet
 document.addEventListener("click", () => {
   if (forming) return;
   forming = true;
@@ -195,5 +148,3 @@ document.addEventListener("click", () => {
 
 </body>
 </html>
-
-
