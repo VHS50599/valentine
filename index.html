@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Para Mi Monita Hermosa ❤️</title>
+<style>
+  body {
+    background-color: #b180f0;
+    text-align: center;
+    margin-top: 100px;
+    font-family: Arial;
+    overflow: hidden;
+    position: relative; /* for absolute hearts */
+  }
+
+  h1, p {
+    color: white;
+    z-index: 10;
+    position: relative;
+  }
+
+  .heart {
+    position: absolute;
+    color: white;
+    font-size: 20px;
+    opacity: 0;
+    user-select: none;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Feliz Día De San Valentín ❤️</h1>
+<p>Eres lo más importante que tengo.</p>
+
+<script>
+  const numHearts = 50; // more hearts
+  const hearts = [];
+
+  // create hearts
+  for(let i = 0; i < numHearts; i++) {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.innerHTML = '❤';
+    document.body.appendChild(heart);
+
+    // initialize random position, size, speed, and phase
+    heart.style.left = Math.random() * window.innerWidth + 'px';
+    heart.style.top = Math.random() * window.innerHeight + 'px';
+    const size = 10 + Math.random() * 30; // 10px to 40px
+    heart.style.fontSize = size + 'px';
+    heart.blinkSpeed = 0.005 + Math.random() * 0.01; // slower, random speed
+    heart.phase = Math.random(); // random start phase
+    hearts.push(heart);
+  }
+
+  function animateHearts() {
+    hearts.forEach(heart => {
+      heart.phase += heart.blinkSpeed; // each heart moves at its own speed
+      if(heart.phase >= 1) {
+        // reset to new position and size
+        heart.style.left = Math.random() * window.innerWidth + 'px';
+        heart.style.top = Math.random() * window.innerHeight + 'px';
+        const size = 10 + Math.random() * 30;
+        heart.style.fontSize = size + 'px';
+        heart.phase = 0;
+      }
+      // opacity as sine wave for smooth fade
+      heart.style.opacity = Math.sin(heart.phase * Math.PI);
+    });
+
+    requestAnimationFrame(animateHearts);
+  }
+
+  animateHearts();
+</script>
+
+</body>
+</html>
