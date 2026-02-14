@@ -81,12 +81,11 @@
     user-select: none;
     pointer-events: none;
     opacity: 0;
+    transition: opacity 0.3s ease;
     z-index: 2;
     will-change: transform, opacity;
     backface-visibility: hidden;
     transform-style: preserve-3d;
-    transition: opacity 0.3s ease;
-    font-weight: bold;
   }
 
   #bouquet {
@@ -110,8 +109,8 @@
 
   .background-sparkle {
     z-index: 1;
-    background: rgba(255,255,255,0.6);
-    animation-name: bg-sparkle-move;
+    background: rgba(255,255,255,0.8);
+    animation-name: bgSparkleMove;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
     animation-direction: alternate;
@@ -124,7 +123,7 @@
     z-index: 6;
   }
 
-  @keyframes bg-sparkle-move {
+  @keyframes bgSparkleMove {
     0% { transform: translate(0,0); opacity: 0.3; }
     100% { transform: translate(30px, 30px); opacity: 0.7; }
   }
@@ -141,100 +140,100 @@
 <img id="bouquet" src="bouquet.png" alt="Bouquet">
 
 <script>
+// Hearts
 const numHearts = 150;
 const hearts = [];
 const heartPositions = [];
 const heartSizes = [];
 let forming = false;
 
-// Create background sparkles with CSS animations (200 sparkles)
+// Background sparkles (200 sparkles, CSS animated)
 const bgSparkles = [];
 for(let i=0; i<200; i++) {
   const s = document.createElement("div");
   s.className = "background-sparkle";
-  const size = 2 + Math.random() * 4;
+  const size = 2 + Math.random()*4;
   s.style.width = size + "px";
   s.style.height = size + "px";
   s.style.left = Math.random() * window.innerWidth + "px";
   s.style.top = Math.random() * window.innerHeight + "px";
-  s.style.animationDuration = (6 + Math.random()*4) + "s";
-  s.style.animationDirection = Math.random() > 0.5 ? 'alternate' : 'alternate-reverse';
+  s.style.animationDuration = (4 + Math.random() * 3) + "s";
+  s.style.animationDirection = Math.random() > 0.5 ? "alternate" : "alternate-reverse";
   document.body.appendChild(s);
   bgSparkles.push(s);
 }
 
-function getTextRects(){
-  return Array.from(document.querySelectorAll('h1,p')).map(el=>el.getBoundingClientRect());
+// Heart helpers
+function getTextRects() {
+  return Array.from(document.querySelectorAll('h1,p')).map(el => el.getBoundingClientRect());
 }
-
 function isOverlapping(x1,y1,r1,x2,y2,r2){
-  return Math.sqrt((x1-x2)**2+(y1-y2)**2)<r1+r2;
+  return Math.sqrt((x1-x2)**2+(y1-y2)**2) < r1 + r2;
 }
-
 function overlapsText(x,y,r,textRects){
   return textRects.some(rect => {
     const cx = Math.max(rect.left, Math.min(x, rect.right));
     const cy = Math.max(rect.top, Math.min(y, rect.bottom));
-    return Math.sqrt((x-cx)**2 + (y-cy)**2) < r;
+    return Math.sqrt((x - cx)**2 + (y - cy)**2) < r;
   });
 }
-
 function getNonOverlappingPosition(radius, textRects){
-  for(let attempt=0; attempt<100; attempt++){
-    const x = Math.random()*(window.innerWidth - 2*radius) + radius;
-    const y = Math.random()*(window.innerHeight - 2*radius) + radius;
-    if(!overlapsText(x,y,radius,textRects) && !heartPositions.some((p,i) => isOverlapping(x,y,radius,p.x,p.y,heartSizes[i]))) {
-      return {x,y};
+  for(let attempt=0; attempt<200; attempt++){
+    const x = Math.random() * (window.innerWidth - 2 * radius) + radius;
+    const y = Math.random() * (window.innerHeight - 2 * radius) + radius;
+    if(!overlapsText(x, y, radius, textRects) && !heartPositions.some((p, i) => isOverlapping(x, y, radius, p.x, p.y, heartSizes[i]))) {
+      return {x, y};
     }
   }
-  return {x: window.innerWidth/2, y: window.innerHeight/2};
+  return {x: window.innerWidth / 2, y: window.innerHeight / 2};
 }
 
 // Create hearts
-for(let i=0; i<numHearts; i++){
+for(let i=0; i<numHearts; i++) {
   const heart = document.createElement("div");
   heart.className = "heart";
-  heart.textContent = "\u2764\uFE0E";
+  heart.innerHTML = "\u2764\uFE0E";
   const size = 15 + Math.random() * 25;
   heart.style.fontSize = size + "px";
   const radius = size * 0.6;
   document.body.appendChild(heart);
   hearts.push(heart);
   heartSizes.push(radius);
-  heartPositions.push({x:0,y:0});
+  heartPositions.push({x: 0, y: 0});
 }
 
-// Animate hearts using a loop and requestAnimationFrame to batch updates
-let heartTimers = new Array(numHearts).fill(0);
-const heartStates = new Array(numHearts).fill('waiting'); // 'waiting' or 'visible'
-const heartTimeouts = new Array(numHearts).fill(0);
+// Animate hearts using a centralized requestAnimationFrame loop (replace setTimeouts)
+const heartState = hearts.map(() => ({ visible: false, nextChange: 0 }));
 
-function animateHeartsLoop(timestamp) {
+function animateHearts(timestamp = 0) {
   const textRects = getTextRects();
-  for(let i=0; i<numHearts; i++) {
-    if(!heartTimers[i]) heartTimers[i] = timestamp + Math.random()*1500;
+  for(let i = 0; i < numHearts; i++) {
+    if(!heartState[i].nextChange) heartState[i].nextChange = timestamp + Math.random() * 1000;
 
-    if(timestamp >= heartTimers[i]) {
+    if(timestamp >= heartState[i].nextChange) {
       const heart = hearts[i];
-      if(heartStates[i] === 'waiting') {
-        // Show heart
-        const pos = getNonOverlappingPosition(heartSizes[i], textRects);
-        heartPositions[i] = pos;
-        heart.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
-        heart.style.opacity = '1';
-        heartStates[i] = 'visible';
-        heartTimers[i] = timestamp + 800 + Math.random()*700;
-      } else {
+      const radius = heartSizes[i];
+
+      if(heartState[i].visible) {
         // Hide heart
-        hearts[i].style.opacity = '0';
-        heartStates[i] = 'waiting';
-        heartTimers[i] = timestamp + 300 + Math.random()*700;
+        heart.style.opacity = 0;
+        heartState[i].visible = false;
+        heartState[i].nextChange = timestamp + 300 + Math.random() * 700;
+      } else {
+        // Show heart at a non-overlapping position
+        const pos = getNonOverlappingPosition(radius, textRects);
+        heartPositions[i] = pos;
+        // Use GPU accelerated transform
+        heart.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+        heart.style.opacity = 1;
+        heartState[i].visible = true;
+        heartState[i].nextChange = timestamp + 800 + Math.random() * 700;
       }
     }
   }
-  requestAnimationFrame(animateHeartsLoop);
+  requestAnimationFrame(animateHearts);
 }
-requestAnimationFrame(animateHeartsLoop);
+requestAnimationFrame(animateHearts);
 
 // Click event: bouquet + sparkles
 document.addEventListener("click", () => {
@@ -250,24 +249,24 @@ document.addEventListener("click", () => {
     bouquet.style.transform = "translate(-50%, -50%) scale(1) rotate(0deg)";
 
     const rect = bouquet.getBoundingClientRect();
-    for(let i=0; i<40; i++){
+    for(let i=0; i<40; i++) {
       const sparkle = document.createElement("div");
       sparkle.className = "sparkle";
       document.body.appendChild(sparkle);
-      const size = 2 + Math.random()*5;
+      const size = 2 + Math.random() * 5;
       sparkle.style.width = sparkle.style.height = size + "px";
-      sparkle.style.left = (rect.left + rect.width/2) + "px";
-      sparkle.style.top = (rect.top + rect.height/2) + "px";
+      sparkle.style.left = (rect.left + rect.width / 2) + "px";
+      sparkle.style.top = (rect.top + rect.height / 2) + "px";
 
       const angle = Math.random() * 2 * Math.PI;
       const dist = 80 + Math.random() * 70;
       const endX = Math.cos(angle) * dist;
       const endY = Math.sin(angle) * dist;
 
-      sparkle.style.opacity = 0.5 + Math.random()*0.5;
+      sparkle.style.opacity = 0.5 + Math.random() * 0.5;
       sparkle.style.transition = "transform 1.2s ease-out, opacity 1.2s ease-out";
       setTimeout(() => {
-        sparkle.style.transform = `translate3d(${endX}px,${endY}px,0)`;
+        sparkle.style.transform = `translate3d(${endX}px, ${endY}px, 0)`;
         sparkle.style.opacity = 0;
       }, 50);
       setTimeout(() => sparkle.remove(), 1300);
