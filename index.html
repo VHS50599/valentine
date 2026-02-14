@@ -5,13 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body {
-    background-color: #b180f0;
+    background: radial-gradient(circle at top, #c79cff 0%, #a46bf5 40%, #7a42d1 100%);
     text-align: center;
     margin: 0;
     font-family: Arial, sans-serif;
     overflow: hidden;
     position: relative;
     min-height: 100vh;
+    animation: bgShift 12s infinite ease-in-out;
+  }
+
+  @keyframes bgShift {
+    0% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(6deg); }
+    100% { filter: hue-rotate(0deg); }
   }
 
   h1, p {
@@ -80,7 +87,6 @@ function isOverlapping(x1, y1, r1, x2, y2, r2) {
 // Check if heart overlaps any text rect
 function overlapsText(x, y, r, textRects) {
   for (const rect of textRects) {
-    // Find closest point in rect to circle center
     const closestX = Math.max(rect.left, Math.min(x, rect.right));
     const closestY = Math.max(rect.top, Math.min(y, rect.bottom));
     const dx = x - closestX;
@@ -102,7 +108,6 @@ function getNonOverlappingPosition(radius) {
 
     let overlap = false;
 
-    // Check other hearts
     for (let i=0; i<heartPositions.length; i++) {
       if (isOverlapping(x, y, radius, heartPositions[i].x, heartPositions[i].y, heartSizes[i])) {
         overlap = true;
@@ -110,7 +115,6 @@ function getNonOverlappingPosition(radius) {
       }
     }
 
-    // Check text
     if (!overlap && overlapsText(x, y, radius, textRects)) {
       overlap = true;
     }
@@ -143,7 +147,6 @@ function animateHeart(i) {
   const radius = heartSizes[i];
 
   function blink() {
-    // Pick new position avoiding text and other hearts
     const pos = getNonOverlappingPosition(radius);
     if (pos) {
       heart.style.left = pos.x + "px";
@@ -151,15 +154,13 @@ function animateHeart(i) {
       heartPositions[i] = { x: pos.x, y: pos.y };
     }
 
-    // Show heart
     heart.style.opacity = 1;
 
-    // Visible time
     const visibleTime = 800 + Math.random()*700;
 
     setTimeout(() => {
       heart.style.opacity = 0;
-      const invisibleTime = 300 + Math.random()*700; // stagger
+      const invisibleTime = 300 + Math.random()*700;
       setTimeout(blink, invisibleTime);
     }, visibleTime);
   }
@@ -167,7 +168,7 @@ function animateHeart(i) {
   blink();
 }
 
-// Start all hearts
+// Start hearts
 for(let i=0; i<hearts.length; i++){
   setTimeout(() => animateHeart(i), Math.random()*1000);
 }
