@@ -15,6 +15,17 @@
     position: relative;
     min-height: 100vh;
     animation: bgShift 10s infinite ease-in-out;
+    transition: box-shadow 0.4s ease;
+  }
+
+  /* Romantic cinematic border */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.3);
+    z-index: 20;
   }
 
   @keyframes bgShift {
@@ -209,10 +220,18 @@ for(let i=0; i<hearts.length; i++){
   setTimeout(() => animateHeart(i), Math.random()*1000);
 }
 
+// Click event: bouquet + soft light burst
 document.addEventListener("click", () => {
   if (forming) return;
   forming = true;
 
+  // Stronger soft light burst
+  document.body.style.boxShadow = "inset 0 0 400px 80px rgba(255,255,255,0.4), 0 0 150px rgba(255,255,255,0.15)";
+  setTimeout(() => {
+    document.body.style.boxShadow = "none";
+  }, 800);
+
+  // Bouquet entrance
   setTimeout(() => {
     const bouquet = document.getElementById("bouquet");
     bouquet.style.opacity = 1;
