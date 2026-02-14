@@ -22,7 +22,6 @@
     transition: box-shadow 0.4s ease;
   }
 
-  /* Romantic cinematic border */
   body::after {
     content: "";
     position: fixed;
@@ -32,7 +31,6 @@
     z-index: 20;
   }
 
-  /* Floating blur blobs */
   .blob {
     position: absolute;
     width: 500px;
@@ -97,15 +95,23 @@
     width: 400px;
   }
 
-  .sparkle {
+  .sparkle, .background-sparkle {
     position: absolute;
-    width: 6px;
-    height: 6px;
-    background: rgba(255,255,255,0.9);
     border-radius: 50%;
     pointer-events: none;
     opacity: 0;
     filter: blur(2px);
+  }
+
+  .background-sparkle {
+    z-index: 1;
+    background: rgba(255,255,255,0.8);
+  }
+
+  .sparkle {
+    width: 5px;
+    height: 5px;
+    background: rgba(255,255,255,0.9);
     z-index: 6;
   }
 </style>
@@ -121,117 +127,118 @@
 <img id="bouquet" src="bouquet.png" alt="Bouquet">
 
 <script>
-const numHearts = 150; // fewer hearts for clarity
+// Hearts
+const numHearts = 150;
 const hearts = [];
 const heartPositions = [];
 const heartSizes = [];
 let forming = false;
 
-// Grab text boundaries
-function getTextRects() {
-  const rects = [];
-  const elements = document.querySelectorAll('h1, p');
-  elements.forEach(el => rects.push(el.getBoundingClientRect()));
-  return rects;
+// Background sparkles (enhanced)
+const bgSparkles = [];
+for(let i=0;i<200;i++){ // more sparkles
+  const s=document.createElement("div");
+  s.className="background-sparkle";
+  const size = 2 + Math.random()*4; // 2-6px
+  s.style.width = size + "px";
+  s.style.height = size + "px";
+  s.style.left = Math.random()*window.innerWidth + "px";
+  s.style.top = Math.random()*window.innerHeight + "px";
+  s.style.opacity = Math.random()*0.5 + 0.2; // 0.2-0.7
+  document.body.appendChild(s);
+  bgSparkles.push(s);
 }
 
-function isOverlapping(x1, y1, r1, x2, y2, r2) {
-  const dx = x1 - x2;
-  const dy = y1 - y2;
-  return Math.sqrt(dx*dx + dy*dy) < r1 + r2;
+// Animate background sparkles gently
+function animateBgSparkle(s){
+  const duration = 4000 + Math.random()*3000;
+  const dx = (Math.random()-0.5)*50;
+  const dy = (Math.random()-0.5)*50;
+  s.style.transition = `transform ${duration}ms ease-in-out, opacity ${duration}ms ease-in-out`;
+  s.style.transform = `translate(${dx}px, ${dy}px)`;
+  s.style.opacity = Math.random()*0.5 + 0.2;
+  setTimeout(()=>animateBgSparkle(s), duration);
 }
+bgSparkles.forEach(s=>animateBgSparkle(s));
 
-function overlapsText(x, y, r, textRects) {
-  return textRects.some(rect => {
-    const closestX = Math.max(rect.left, Math.min(x, rect.right));
-    const closestY = Math.max(rect.top, Math.min(y, rect.bottom));
-    return Math.sqrt((x - closestX)**2 + (y - closestY)**2) < r;
-  });
-}
-
-function getNonOverlappingPosition(radius) {
-  const textRects = getTextRects();
-  for(let attempt=0; attempt<200; attempt++){
-    const x = Math.random() * (window.innerWidth - 2*radius) + radius;
-    const y = Math.random() * (window.innerHeight - 2*radius) + radius;
-    if (!overlapsText(x, y, radius, textRects) &&
-        !heartPositions.some((p, i) => isOverlapping(x, y, radius, p.x, p.y, heartSizes[i]))) {
-      return {x, y};
-    }
+// Hearts setup
+function getTextRects(){return Array.from(document.querySelectorAll('h1,p')).map(el=>el.getBoundingClientRect());}
+function isOverlapping(x1,y1,r1,x2,y2,r2){return Math.sqrt((x1-x2)**2+(y1-y2)**2)<r1+r2;}
+function overlapsText(x,y,r,textRects){return textRects.some(rect=>Math.sqrt((x-Math.max(rect.left,Math.min(x,rect.right)))**2+(y-Math.max(rect.top,Math.min(y,rect.bottom)))**2)<r);}
+function getNonOverlappingPosition(radius){
+  const textRects=getTextRects();
+  for(let attempt=0;attempt<200;attempt++){
+    const x=Math.random()*(window.innerWidth-2*radius)+radius;
+    const y=Math.random()*(window.innerHeight-2*radius)+radius;
+    if(!overlapsText(x,y,radius,textRects)&&!heartPositions.some((p,i)=>isOverlapping(x,y,radius,p.x,p.y,heartSizes[i]))) return {x,y};
   }
-  return {x: window.innerWidth/2, y: window.innerHeight/2};
+  return {x:window.innerWidth/2,y:window.innerHeight/2};
 }
-
-// Create hearts
 for(let i=0;i<numHearts;i++){
-  const heart = document.createElement("div");
-  heart.className = "heart";
-  heart.innerHTML = "\u2764\uFE0E";
-  const size = 15 + Math.random()*25;
-  heart.style.fontSize = size + "px";
-  const radius = size*0.6;
+  const heart=document.createElement("div");
+  heart.className="heart";
+  heart.innerHTML="\u2764\uFE0E";
+  const size=15+Math.random()*25;
+  heart.style.fontSize=size+"px";
+  const radius=size*0.6;
   document.body.appendChild(heart);
   hearts.push(heart);
   heartSizes.push(radius);
   heartPositions.push({x:0,y:0});
 }
-
-// Animate hearts
 function animateHeart(i){
-  const heart = hearts[i];
-  const radius = heartSizes[i];
+  const heart=hearts[i];
+  const radius=heartSizes[i];
   function blink(){
-    const pos = getNonOverlappingPosition(radius);
-    heart.style.left = pos.x + "px";
-    heart.style.top = pos.y + "px";
-    heartPositions[i] = pos;
-    heart.style.opacity = 1;
+    const pos=getNonOverlappingPosition(radius);
+    heart.style.left=pos.x+"px";
+    heart.style.top=pos.y+"px";
+    heartPositions[i]=pos;
+    heart.style.opacity=1;
     setTimeout(()=>{
-      heart.style.opacity = 0;
-      setTimeout(blink, 300 + Math.random()*700);
-    }, 800 + Math.random()*700);
+      heart.style.opacity=0;
+      setTimeout(blink,300+Math.random()*700);
+    },800+Math.random()*700);
   }
   blink();
 }
-hearts.forEach((_,i)=>setTimeout(()=>animateHeart(i), Math.random()*1000));
+hearts.forEach((_,i)=>setTimeout(()=>animateHeart(i),Math.random()*1000));
 
-// Click: bouquet + light burst + sparkles
-document.addEventListener("click", ()=>{
+// Click event: bouquet + sparkles
+document.addEventListener("click",()=>{
   if(forming) return;
-  forming = true;
+  forming=true;
 
   // Light burst
-  document.body.style.boxShadow = "inset 0 0 400px 80px rgba(255,255,255,0.4), 0 0 150px rgba(255,255,255,0.15)";
-  setTimeout(()=>document.body.style.boxShadow="none", 800);
+  document.body.style.boxShadow="inset 0 0 400px 80px rgba(255,255,255,0.4), 0 0 150px rgba(255,255,255,0.15)";
+  setTimeout(()=>document.body.style.boxShadow="none",800);
 
-  // Bouquet entrance
   setTimeout(()=>{
-    const bouquet = document.getElementById("bouquet");
-    bouquet.style.opacity = 1;
-    bouquet.style.transform = "translate(-50%, -50%) scale(1) rotate(0deg)";
+    const bouquet=document.getElementById("bouquet");
+    bouquet.style.opacity=1;
+    bouquet.style.transform="translate(-50%, -50%) scale(1) rotate(0deg)";
 
-    // Sparkles
-    const rect = bouquet.getBoundingClientRect();
+    const rect=bouquet.getBoundingClientRect();
     for(let i=0;i<40;i++){
-      const sparkle = document.createElement("div");
-      sparkle.className = "sparkle";
+      const sparkle=document.createElement("div");
+      sparkle.className="sparkle";
       document.body.appendChild(sparkle);
+      sparkle.style.width = sparkle.style.height = (2+Math.random()*5) + "px"; // varied size
+      sparkle.style.left=(rect.left+rect.width/2)+"px";
+      sparkle.style.top=(rect.top+rect.height/2)+"px";
 
-      sparkle.style.left = (rect.left + rect.width/2) + "px";
-      sparkle.style.top = (rect.top + rect.height/2) + "px";
+      const angle=Math.random()*2*Math.PI;
+      const dist=80+Math.random()*70;
+      const endX=Math.cos(angle)*dist;
+      const endY=Math.sin(angle)*dist;
 
-      const angle = Math.random()*2*Math.PI;
-      const dist = 80 + Math.random()*70;
-      const endX = Math.cos(angle)*dist;
-      const endY = Math.sin(angle)*dist;
-
-      sparkle.style.opacity = 1;
-      sparkle.style.transition = "transform 1.2s ease-out, opacity 1.2s ease-out";
+      sparkle.style.opacity = Math.random()*0.5 + 0.5; // 0.5-1
+      sparkle.style.transition="transform 1.2s ease-out, opacity 1.2s ease-out";
       setTimeout(()=>{
-        sparkle.style.transform = `translate(${endX}px, ${endY}px)`;
-        sparkle.style.opacity = 0;
-      }, 50);
-      setTimeout(()=>sparkle.remove(), 1300);
+        sparkle.style.transform=`translate(${endX}px,${endY}px)`;
+        sparkle.style.opacity=0;
+      },50);
+      setTimeout(()=>sparkle.remove(),1300);
     }
   },900);
 });
