@@ -5,20 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body {
-    background: radial-gradient(circle at top, #c79cff 0%, #a46bf5 40%, #7a42d1 100%);
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15), transparent 40%),
+      radial-gradient(circle at top, #d8b4ff 0%, #a46bf5 35%, #6a2fc2 100%);
     text-align: center;
     margin: 0;
     font-family: Arial, sans-serif;
     overflow: hidden;
     position: relative;
     min-height: 100vh;
-    animation: bgShift 12s infinite ease-in-out;
+    animation: bgShift 10s infinite ease-in-out;
   }
 
   @keyframes bgShift {
-    0% { filter: hue-rotate(0deg); }
-    50% { filter: hue-rotate(6deg); }
-    100% { filter: hue-rotate(0deg); }
+    0% { filter: hue-rotate(0deg) brightness(1); }
+    50% { filter: hue-rotate(10deg) brightness(1.05); }
+    100% { filter: hue-rotate(0deg) brightness(1); }
   }
 
   h1, p {
@@ -66,7 +68,6 @@ const heartPositions = [];
 const heartSizes = [];
 let forming = false;
 
-// Grab text boundaries
 function getTextRects() {
   const rects = [];
   const elements = document.querySelectorAll('h1, p');
@@ -76,7 +77,6 @@ function getTextRects() {
   return rects;
 }
 
-// Check overlap between two circles
 function isOverlapping(x1, y1, r1, x2, y2, r2) {
   const dx = x1 - x2;
   const dy = y1 - y2;
@@ -84,7 +84,6 @@ function isOverlapping(x1, y1, r1, x2, y2, r2) {
   return distance < r1 + r2;
 }
 
-// Check if heart overlaps any text rect
 function overlapsText(x, y, r, textRects) {
   for (const rect of textRects) {
     const closestX = Math.max(rect.left, Math.min(x, rect.right));
@@ -97,7 +96,6 @@ function overlapsText(x, y, r, textRects) {
   return false;
 }
 
-// Find random position avoiding hearts and text
 function getNonOverlappingPosition(radius) {
   const maxAttempts = 200;
   let attempt = 0;
@@ -125,7 +123,6 @@ function getNonOverlappingPosition(radius) {
   return null;
 }
 
-// Create hearts
 for(let i=0; i<numHearts; i++){
   const heart = document.createElement("div");
   heart.className = "heart";
@@ -141,7 +138,6 @@ for(let i=0; i<numHearts; i++){
   heartPositions.push({ x: 0, y: 0 });
 }
 
-// Animate single heart
 function animateHeart(i) {
   const heart = hearts[i];
   const radius = heartSizes[i];
@@ -168,12 +164,10 @@ function animateHeart(i) {
   blink();
 }
 
-// Start hearts
 for(let i=0; i<hearts.length; i++){
   setTimeout(() => animateHeart(i), Math.random()*1000);
 }
 
-// Click to show bouquet
 document.addEventListener("click", () => {
   if (forming) return;
   forming = true;
