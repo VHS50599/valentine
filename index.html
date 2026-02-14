@@ -6,8 +6,8 @@
 <style>
   body {
     background:
-      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15), transparent 40%),
-      radial-gradient(circle at top, #d8b4ff 0%, #a46bf5 35%, #6a2fc2 100%);
+      radial-gradient(circle at 70% 75%, rgba(255,255,255,0.18), transparent 45%),
+      radial-gradient(circle at 50% 60%, #d8b4ff 0%, #a46bf5 35%, #6a2fc2 100%);
     text-align: center;
     margin: 0;
     font-family: Arial, sans-serif;
@@ -19,8 +19,34 @@
 
   @keyframes bgShift {
     0% { filter: hue-rotate(0deg) brightness(1); }
-    50% { filter: hue-rotate(10deg) brightness(1.05); }
+    50% { filter: hue-rotate(8deg) brightness(1.04); }
     100% { filter: hue-rotate(0deg) brightness(1); }
+  }
+
+  /* Floating blur blobs */
+  .blob {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 50%;
+    filter: blur(100px);
+    top: 20%;
+    left: 10%;
+    animation: float 14s infinite ease-in-out;
+    z-index: 0;
+  }
+
+  .blob2 {
+    top: 65%;
+    left: 65%;
+    animation-delay: 6s;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-60px); }
+    100% { transform: translateY(0px); }
   }
 
   h1, p {
@@ -28,10 +54,19 @@
     z-index: 10;
     position: relative;
     margin: 20px;
+    text-shadow: 0 0 12px rgba(255,255,255,0.5);
+    -webkit-font-smoothing: antialiased;
   }
 
-  h1 { font-size: clamp(28px, 8vw, 50px); }
-  p { font-size: clamp(18px, 5vw, 30px); }
+  h1 {
+    font-size: clamp(28px, 8vw, 50px);
+    letter-spacing: 2px;
+    text-shadow: 0 0 18px rgba(255,255,255,0.7);
+  }
+
+  p {
+    font-size: clamp(18px, 5vw, 30px);
+  }
 
   .heart {
     position: absolute;
@@ -40,21 +75,27 @@
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 2;
   }
 
+  /* Dramatic bouquet entrance */
   #bouquet {
     position: fixed;
     left: 50%;
     top: 55%;
-    transform: translate(-50%, -50%) scale(0.5);
+    transform: translate(-50%, -50%) scale(0.3) rotate(-10deg);
     opacity: 0;
-    transition: transform 1.5s ease, opacity 1.5s ease;
+    transition: transform 1.5s cubic-bezier(.68,-0.55,.27,1.55), 
+                opacity 1.5s ease;
     z-index: 5;
     width: 400px;
   }
 </style>
 </head>
 <body>
+
+<div class="blob"></div>
+<div class="blob blob2"></div>
 
 <h1>Feliz Día De San Valentín</h1>
 <p>Eres lo más importante que tengo.</p>
@@ -175,7 +216,7 @@ document.addEventListener("click", () => {
   setTimeout(() => {
     const bouquet = document.getElementById("bouquet");
     bouquet.style.opacity = 1;
-    bouquet.style.transform = "translate(-50%, -50%) scale(1)";
+    bouquet.style.transform = "translate(-50%, -50%) scale(1) rotate(0deg)";
   }, 900);
 });
 </script>
