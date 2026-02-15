@@ -104,13 +104,13 @@ p {
 <img id="bouquet" src="bouquet.png" alt="Bouquet">
 
 <script>
-const numHearts = 150; // +10 hearts
+const numHearts = 45; // +10 hearts
 const hearts = [];
 let forming = false;
 
 /* BACKGROUND SPARKLES */
 const bgSparkles = [];
-for(let i=0;i<200;i++){
+for(let i=0;i<100;i++){
   const s=document.createElement("div");
   s.className="background-sparkle";
   const size = 2 + Math.random()*4;
@@ -239,4 +239,5 @@ document.addEventListener("click", ()=>{
 </script>
 </body>
 </html>
+
 
